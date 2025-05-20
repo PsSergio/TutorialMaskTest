@@ -2,24 +2,34 @@ package com.example.maskbackgroundtest;
 
 import android.accessibilityservice.AccessibilityService;
 import android.accessibilityservice.AccessibilityServiceInfo;
-import android.content.SharedPreferences;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.Rect;
+import android.os.Build;
 import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
-import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 
 public class GetElementService extends AccessibilityService {
 
     private final List<ComponentModel> components = new ArrayList<>();
     private static final String TAG = "GetElementService";
+
+
+    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver(){
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Log.e(TAG, "onReceive: bbbbbbbbbbbbbb");
+            getViewEvent();
+        }
+    };
 
     public boolean isNodeComponentLayout(AccessibilityNodeInfo node){
         var layoutsComponents = new String[]{
@@ -106,55 +116,46 @@ public class GetElementService extends AccessibilityService {
         }
     }
 
-    public void toLocalCache(ComponentModel model){
-        var json = new Gson();
-        String text = json.toJson(model);
 
-        SharedPreferences sharedPreferences = getSharedPreferences("LocalCache", MODE_PRIVATE);
-        sharedPreferences.edit().putString("component", text).apply();
-        Log.e(TAG, text);
+    public void getViewEvent(){
+        AccessibilityNodeInfo rootNode = getRootInActiveWindow();
 
+//        getComponent(rootNode);
 
+        Log.e(TAG, "onAccessibilityEvent: Getting element");
     }
 
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
 
-        AccessibilityNodeInfo rootNode = getRootInActiveWindow();
-
-        if(event.getEventType() == AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED || event.getEventType() == AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED) {
-
-            getComponent(rootNode);
-            Random random = new Random();
-            if(!components.isEmpty()){
-                int randomIndex = random.nextInt(components.size());
-                ComponentModel component = components.get(randomIndex);
-                toLocalCache(component);
-            }
-
-            Log.e(TAG, "onAccessibilityEvent: Getting element");
-
-        }
-
 
     }
 
     protected void onServiceConnected() {
+
         super.onServiceConnected();
+
+        IntentFilter intentFilter = new IntentFilter("com.example.maskbackgroundtest.GET_ELEMENTS");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(broadcastReceiver, intentFilter, RECEIVER_NOT_EXPORTED);
+        }
+
         var info = new AccessibilityServiceInfo();
-
-        info.eventTypes = AccessibilityEvent.TYPE_WINDOW_CONTENT_CHANGED | AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED;
-
-        info.feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN;
-
-        info.notificationTimeout = 100;
 
         this.setServiceInfo(info);
     }
 
     @Override
     public void onInterrupt() {
+    }
+
+    @Override
+    public void onDestroy() {
+        unregisterReceiver(broadcastReceiver);
+
+        super.onDestroy();
+
 
     }
 }
