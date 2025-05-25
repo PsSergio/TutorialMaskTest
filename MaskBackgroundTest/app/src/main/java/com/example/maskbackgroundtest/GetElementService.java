@@ -56,7 +56,7 @@ public class GetElementService extends AccessibilityService {
 
     public boolean isComponentValidLayout(AccessibilityNodeInfo node){
 
-        if(!isNodeComponentLayout(node)) return true;
+        if(!isNodeComponentLayout(node)) return false;
 
         if((node.getContentDescription() != null || node.getText() != null) && (node.isClickable() || node.isFocusable())) return true;
 
@@ -64,11 +64,13 @@ public class GetElementService extends AccessibilityService {
     }
 
     public boolean filterComponents(AccessibilityNodeInfo node){
-        if(!isComponentValidLayout(node)) return false;
-
         if(!node.isVisibleToUser()) return false;
+        if(!node.isClickable() && !node.isFocusable()) return false;
+//        if(!isComponentValidLayout(node)
+//        || (node.getText() == null && node.getContentDescription() == null && !node.isFocusable() && !node.isClickable())) return false;
 
-        if(node.getText() == null && node.getContentDescription() == null && !node.isFocusable() && !node.isClickable()) return false;
+
+//        if() return false;
 
         if(node.getClassName().toString().equals("android.widget.ImageView") && node.getContentDescription() == null)
             return false;
@@ -107,7 +109,7 @@ public class GetElementService extends AccessibilityService {
 
         components.add(componentModel);
 
-//        printComponents(componentModel);
+        printComponents(componentModel);
 
     }
 

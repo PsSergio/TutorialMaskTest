@@ -48,10 +48,10 @@ public class MaskView extends View {
     }
 
     public void setPositions(BoundsModel boundsModel){
-        this.left = boundsModel.getLeft();
-        this.top = boundsModel.getTop();
-        this.right = boundsModel.getRight();
-        this.bottom = boundsModel.getBottom();
+        this.left = boundsModel.getLeft() - 20;
+        this.top = boundsModel.getTop() - 80;
+        this.right = boundsModel.getRight() + 20;
+        this.bottom = boundsModel.getBottom() -30;
         invalidate(); // Redesenhar
     }
 
