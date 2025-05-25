@@ -12,6 +12,8 @@ import android.util.Log;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -22,12 +24,11 @@ public class GetElementService extends AccessibilityService {
     private final List<ComponentModel> components = new ArrayList<>();
     private static final String TAG = "GetElementService";
 
-
-    private final BroadcastReceiver broadcastReceiver = new BroadcastReceiver(){
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.e(TAG, "onReceive: bbbbbbbbbbbbbb");
             getViewEvent();
+            Log.e(TAG, "onReceive: ");
         }
     };
 
@@ -99,13 +100,24 @@ public class GetElementService extends AccessibilityService {
 
         components.add(componentModel);
 
+        printComponents(componentModel);
+
     }
 
+    public void printComponents(ComponentModel model){
+        Gson json = new Gson();
+
+        Log.e(TAG, json.toJson(model));
+
+    }
 
     public void getComponent(AccessibilityNodeInfo node){
+
         if(node == null) return;
 
         if(filterComponents(node)) {
+            Log.e(TAG, "getComponent: ");
+
             addComponent(node);
         }
 
@@ -119,8 +131,11 @@ public class GetElementService extends AccessibilityService {
 
     public void getViewEvent(){
         AccessibilityNodeInfo rootNode = getRootInActiveWindow();
+//        boolean val = rootNode == null;
+//        if(val) Log.e(TAG, "true");
+//        else Log.e(TAG, "false");
 
-//        getComponent(rootNode);
+        getComponent(rootNode);
 
         Log.e(TAG, "onAccessibilityEvent: Getting element");
     }
@@ -132,16 +147,23 @@ public class GetElementService extends AccessibilityService {
 
     }
 
+    @Override
     protected void onServiceConnected() {
 
         super.onServiceConnected();
 
-        IntentFilter intentFilter = new IntentFilter("com.example.maskbackgroundtest.GET_ELEMENTS");
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.example.maskbackgroundtest.GET_ALL_UI_COMPONENTS");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            registerReceiver(broadcastReceiver, intentFilter, RECEIVER_NOT_EXPORTED);
+            registerReceiver(receiver, intentFilter, RECEIVER_EXPORTED);
         }
 
+
+//        getViewEvent();
+
         var info = new AccessibilityServiceInfo();
+
+        info.feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN;
 
         this.setServiceInfo(info);
     }
@@ -152,8 +174,7 @@ public class GetElementService extends AccessibilityService {
 
     @Override
     public void onDestroy() {
-        unregisterReceiver(broadcastReceiver);
-
+        unregisterReceiver(receiver);
         super.onDestroy();
 
 

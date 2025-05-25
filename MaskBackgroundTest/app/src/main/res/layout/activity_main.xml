@@ -9,15 +9,6 @@
     tools:context=".MainActivity">
 
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="200dp"
-        android:layout_height="100dp"
-        android:layout_marginBottom="119dp"
-        android:text="Mascarar"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
 
     <!--    <com.example.maskbackgroundtest.MaskView-->
 <!--        android:id="@+id/mask"-->

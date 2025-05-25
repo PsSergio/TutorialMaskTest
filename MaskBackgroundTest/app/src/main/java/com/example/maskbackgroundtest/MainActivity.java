@@ -18,14 +18,21 @@ import androidx.appcompat.app.AppCompatActivity;
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "GettingCache";
+//    private final MyReceiver receiver = new MyReceiver();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-//        startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
+        startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
 //
+//        IntentFilter intentFilter = new IntentFilter();
+//        intentFilter.addAction("com.example.maskbackgroundtest.GET_ALL_UI_COMPONENTS");
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            registerReceiver(receiver, intentFilter, RECEIVER_EXPORTED);
+//        }
+
         if (!Settings.canDrawOverlays(this)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
                     Uri.parse("package:" + getPackageName()));
@@ -53,7 +60,8 @@ public class MainActivity extends AppCompatActivity {
                 Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ?
                         WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY :
                         WindowManager.LayoutParams.TYPE_PHONE,
-                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
+                        WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 PixelFormat.TRANSLUCENT
         );
 
@@ -65,6 +73,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Log.e(TAG, "onClick: Clicou!");
+                Intent intent = new Intent("com.example.maskbackgroundtest.GET_ALL_UI_COMPONENTS");
+                sendBroadcast(intent);
             }
         });
 
@@ -73,4 +83,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    protected void onDestroy() {
+//        unregisterReceiver(receiver);
+        super.onDestroy();
+    }
 }
