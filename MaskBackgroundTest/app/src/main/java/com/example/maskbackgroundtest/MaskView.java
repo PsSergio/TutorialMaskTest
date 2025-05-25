@@ -6,7 +6,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
-import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.View;
 
@@ -48,11 +47,11 @@ public class MaskView extends View {
         maskPaint.setAntiAlias(true ); // suaviza as bordas
     }
 
-    public void setPositions(Rect rect){
-        this.left = rect.left;
-        this.top = rect.top;
-        this.right = rect.right;
-        this.bottom = rect.bottom;
+    public void setPositions(BoundsModel boundsModel){
+        this.left = boundsModel.getLeft();
+        this.top = boundsModel.getTop();
+        this.right = boundsModel.getRight();
+        this.bottom = boundsModel.getBottom();
         invalidate(); // Redesenhar
     }
 

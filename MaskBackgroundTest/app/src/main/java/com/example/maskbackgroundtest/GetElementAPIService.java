@@ -1,5 +1,7 @@
 package com.example.maskbackgroundtest;
 
+import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -22,9 +24,19 @@ public class GetElementAPIService {
     private static final MediaType JSON = MediaType.get("application/json; charset=utf-8");
     private String TAG = "APIServiceGetElement";
 
+    private String dataResponse;
+
+    private final Context context;
+
+    public GetElementAPIService(Context context) {
+        this.context = context;
+    }
+
+
     public void getBounds(List<ComponentModel> componentModelList){
-        Log.e(TAG, "inicio" );
+//        Log.e(TAG, "inicio" );
         Gson gson = new Gson();
+
         OkHttpClient client = new OkHttpClient();
 
         String json = gson.toJson(componentModelList);
@@ -32,9 +44,11 @@ public class GetElementAPIService {
         RequestBody body = RequestBody.create(json, JSON);
 
         Request request = new Request.Builder()
-                .url("http://10.0.0.181:8080/component/getBounds")
+                .url("http://192.168.0.110:8080/component/getBounds")
                 .post(body)
                 .build();
+
+
 
         client.newCall(request).enqueue(new Callback() {
             @Override
@@ -49,9 +63,13 @@ public class GetElementAPIService {
                 String responseBody = response.body().string();
 
                 if(response.isSuccessful()) {
-                    Log.e(TAG, "Response "+ responseBody);
+//                    Log.e(TAG, "Response "+ responseBody);
+                    dataResponse = responseBody;
+                    Log.e(TAG, "onResponse: " + dataResponse );
 
-                    BoundsModel bounds = gson.fromJson(responseBody, BoundsModel.class);
+                    Intent intentBounds = new Intent("com.example.maskbackgroundtest.GET_BOUNDS_ELEMENT");
+                    intentBounds.putExtra("bounds", dataResponse);
+                    context.sendBroadcast(intentBounds);
 
                 }else{
 //                    Log.e(TAG, response.message().toString() );
@@ -60,7 +78,8 @@ public class GetElementAPIService {
 
             }
         });
-//        return rect;
+//
+
     }
 
 }

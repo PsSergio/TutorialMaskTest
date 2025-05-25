@@ -23,16 +23,16 @@ public class GetElementService extends AccessibilityService {
 
     private final List<ComponentModel> components = new ArrayList<>();
     private static final String TAG = "GetElementService";
-    private final GetElementAPIService service = new GetElementAPIService();
+    private final GetElementAPIService service = new GetElementAPIService(this);
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             getViewEvent();
-            Gson json = new Gson();
-//            Rect rect = service.getBounds(components);
-                service.getBounds(components);
-//            Log.e(TAG, Integer.toString(rect.top));
+
+
+            service.getBounds(components);
+
         }
     };
 
@@ -123,7 +123,7 @@ public class GetElementService extends AccessibilityService {
         if(node == null) return;
 
         if(filterComponents(node)) {
-            Log.e(TAG, "getComponent: ");
+//            Log.e(TAG, "getComponent: ");
 
             addComponent(node);
         }

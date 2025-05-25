@@ -1,9 +1,10 @@
 package com.example.maskbackgroundtest;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.graphics.PixelFormat;
-import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -16,10 +17,23 @@ import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.gson.Gson;
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "GettingCache";
 //    private final MyReceiver receiver = new MyReceiver();
+    private final BroadcastReceiver receiverBounds = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+        Gson gson = new Gson();
+        String response = intent.getStringExtra("bounds");
+//        Log.e(TAG, "onReceive: " + response );
+        BoundsModel bounds = gson.fromJson(response, BoundsModel.class);
+
+        mask.setPositions(bounds);
+    }
+};
 
     private MaskView mask;
     @Override
@@ -34,6 +48,12 @@ public class MainActivity extends AppCompatActivity {
                     Uri.parse("package:" + getPackageName()));
             startActivityForResult(intent, 1);
 
+        }
+
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction("com.example.maskbackgroundtest.GET_BOUNDS_ELEMENT");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(receiverBounds, intentFilter, RECEIVER_EXPORTED);
         }
 
         showOverlay();
@@ -57,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
 
         LayoutInflater inflater = (LayoutInflater) getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         var overlayView = inflater.inflate(R.layout.overlay_layout, null);
-
+        mask = overlayView.findViewById(R.id.mask);
         Button button = overlayView.findViewById(R.id.button1);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -66,13 +86,6 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent("com.example.maskbackgroundtest.GET_ALL_UI_COMPONENTS");
                 sendBroadcast(intent);
 
-                mask = overlayView.findViewById(R.id.mask);
-                Rect rect = new Rect();
-                rect.bottom = 170;
-                rect.top = 90;
-                rect.left = 70;
-                rect.right = 120;
-                mask.setPositions(rect);
             }
         });
 
@@ -83,7 +96,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-//        unregisterReceiver(receiver);
+        unregisterReceiver(receiverBounds);
         super.onDestroy();
     }
 }
