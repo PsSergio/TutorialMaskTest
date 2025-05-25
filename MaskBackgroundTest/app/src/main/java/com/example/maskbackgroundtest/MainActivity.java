@@ -3,6 +3,7 @@ package com.example.maskbackgroundtest;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.PixelFormat;
+import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -20,18 +21,13 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "GettingCache";
 //    private final MyReceiver receiver = new MyReceiver();
 
+    private MaskView mask;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         startActivity(new Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS));
-//
-//        IntentFilter intentFilter = new IntentFilter();
-//        intentFilter.addAction("com.example.maskbackgroundtest.GET_ALL_UI_COMPONENTS");
-//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//            registerReceiver(receiver, intentFilter, RECEIVER_EXPORTED);
-//        }
 
         if (!Settings.canDrawOverlays(this)) {
             Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION,
@@ -42,12 +38,6 @@ public class MainActivity extends AppCompatActivity {
 
         showOverlay();
 
-
-
-//        button.setOnClickListener(e -> {
-//            Intent intent = new Intent("com.example.maskbackgroundtest.GET_ELEMENTS");
-//            sendBroadcast(intent);
-//        });
     }
 
     private void showOverlay(){
@@ -75,6 +65,14 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "onClick: Clicou!");
                 Intent intent = new Intent("com.example.maskbackgroundtest.GET_ALL_UI_COMPONENTS");
                 sendBroadcast(intent);
+
+                mask = overlayView.findViewById(R.id.mask);
+                Rect rect = new Rect();
+                rect.bottom = 170;
+                rect.top = 90;
+                rect.left = 70;
+                rect.right = 120;
+                mask.setPositions(rect);
             }
         });
 

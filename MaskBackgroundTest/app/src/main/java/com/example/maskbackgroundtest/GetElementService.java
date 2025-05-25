@@ -23,12 +23,16 @@ public class GetElementService extends AccessibilityService {
 
     private final List<ComponentModel> components = new ArrayList<>();
     private static final String TAG = "GetElementService";
+    private final GetElementAPIService service = new GetElementAPIService();
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             getViewEvent();
-            Log.e(TAG, "onReceive: ");
+            Gson json = new Gson();
+//            Rect rect = service.getBounds(components);
+                service.getBounds(components);
+//            Log.e(TAG, Integer.toString(rect.top));
         }
     };
 
@@ -79,6 +83,9 @@ public class GetElementService extends AccessibilityService {
         Rect rect = new Rect();
         rootNodes.getBoundsInScreen(rect);
 
+        BoundsModel bounds = new BoundsModel(rect.left, rect.right, rect.top, rect.bottom);
+
+
         var className = rootNodes.getClassName().toString();
 
         var contentDesc = "null";
@@ -96,11 +103,11 @@ public class GetElementService extends AccessibilityService {
 
         var isClickable = rootNodes.isClickable();
         var isFocusable = rootNodes.isFocusable();
-        var componentModel = new ComponentModel(className, contentDesc, text, isClickable, isFocusable, rect);
+        var componentModel = new ComponentModel(className, contentDesc, text, isClickable, isFocusable, bounds);
 
         components.add(componentModel);
 
-        printComponents(componentModel);
+//        printComponents(componentModel);
 
     }
 
@@ -131,13 +138,10 @@ public class GetElementService extends AccessibilityService {
 
     public void getViewEvent(){
         AccessibilityNodeInfo rootNode = getRootInActiveWindow();
-//        boolean val = rootNode == null;
-//        if(val) Log.e(TAG, "true");
-//        else Log.e(TAG, "false");
 
         getComponent(rootNode);
 
-        Log.e(TAG, "onAccessibilityEvent: Getting element");
+//        Log.e(TAG, "onAccessibilityEvent: Getting element");
     }
 
 

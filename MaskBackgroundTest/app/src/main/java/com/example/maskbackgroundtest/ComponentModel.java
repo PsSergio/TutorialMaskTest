@@ -1,7 +1,5 @@
 package com.example.maskbackgroundtest;
 
-import android.graphics.Rect;
-
 public class ComponentModel {
 
     private final String className;
@@ -14,18 +12,18 @@ public class ComponentModel {
 
     private final boolean isFocusable;
 
-    private final Rect rect;
+    private final BoundsModel bounds;
 
-    public Rect getRect() {
-        return rect;
+    public BoundsModel getBounds() {
+        return bounds;
     }
 
-    public ComponentModel(String className, String contentDescription, String text, boolean isClickable, boolean isFocusable, Rect rect) {
+    public ComponentModel(String className, String contentDescription, String text, boolean isClickable, boolean isFocusable, BoundsModel bounds) {
         this.className = className;
         this.contentDescription = contentDescription;
         this.text = text;
         this.isClickable = isClickable;
         this.isFocusable = isFocusable;
-        this.rect = rect;
+        this.bounds = bounds;
     }
 }
