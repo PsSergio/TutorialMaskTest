@@ -33,8 +33,8 @@ public class GetElementAPIService {
     }
 
 
-    public void getBounds(List<ComponentModel> componentModelList){
-//        Log.e(TAG, "inicio" );
+    public void getIdentifidor(List<ComponentModel> componentModelList){
+
         Gson gson = new Gson();
 
         OkHttpClient client = new OkHttpClient();
@@ -67,9 +67,9 @@ public class GetElementAPIService {
                     dataResponse = responseBody;
                     Log.e(TAG, "onResponse: " + dataResponse );
 
-                    Intent intentBounds = new Intent("com.example.maskbackgroundtest.GET_BOUNDS_ELEMENT");
-                    intentBounds.putExtra("bounds", dataResponse);
-                    context.sendBroadcast(intentBounds);
+                    Intent intentIdenfidor = new Intent("com.example.maskbackgroundtest.GET_IDENTIFOR_ELEMENT");
+                    intentIdenfidor.putExtra("identifidor", dataResponse);
+                    context.sendBroadcast(intentIdenfidor);
 
                 }else{
 //                    Log.e(TAG, response.message().toString() );

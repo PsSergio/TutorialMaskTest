@@ -16,7 +16,6 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 
 public class GetElementService extends AccessibilityService {
@@ -24,53 +23,55 @@ public class GetElementService extends AccessibilityService {
     private final List<ComponentModel> components = new ArrayList<>();
     private static final String TAG = "GetElementService";
     private final GetElementAPIService service = new GetElementAPIService(this);
+    private ComponentIdentidorModel identidorModel;
+    private int idComponent = 0;
+    private List<AccessibilityNodeInfo> nodesSent = new ArrayList<>();
 
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             getViewEvent();
-
-
-            service.getBounds(components);
+            service.getIdentifidor(components);
 
         }
     };
 
-    public boolean isNodeComponentLayout(AccessibilityNodeInfo node){
-        var layoutsComponents = new String[]{
-                "android.view.View",
-                "android.widget.RelativeLayout",
-                "android.widget.LinearLayout",
-                "android.widget.ScrollView",
-                "android.widget.HorizontalScrollView",
-                "android.widget.GridView",
-                "android.view.ViewGroup",
-                "android.widget.ListView",
-                "android.widget.FrameLayout"
-        };
-        for (String layoutsComponent : layoutsComponents) {
-            if (Objects.equals(node.getClassName(), layoutsComponent)) return true;
+    private final BroadcastReceiver receiverIdentifidor = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Gson gson = new Gson();
+            String response = intent.getStringExtra("identifidor");
+
+            identidorModel = gson.fromJson(response, ComponentIdentidorModel.class);
+
+        }};
+
+    private final BroadcastReceiver clickReceiver = new BroadcastReceiver() {
+//        public boolean isBoundsEquals(Rect rect, BoundsModel bounds){
+//            return rect.top == bounds.getTop() &&
+//                    rect.bottom == bounds.getBottom() &&
+//                    rect.left == bounds.getLeft() &&
+//                    rect.right == bounds.getRight();
+//        }
+        @Override
+        public void onReceive(Context context, Intent intent) {
+//            Log.e(TAG, "onReceive: Recebeu");
+            Log.e(TAG, "onReceive: " + identidorModel.getViewID());
+
+            AccessibilityNodeInfo nodeReturned = nodesSent.get(identidorModel.getViewID()-1);
+
+            if(nodeReturned.isClickable()){
+                nodeReturned.performAction(AccessibilityNodeInfo.ACTION_CLICK);
+
+
+            }
+
         }
-        return false;
-    }
-
-    public boolean isComponentValidLayout(AccessibilityNodeInfo node){
-
-        if(!isNodeComponentLayout(node)) return false;
-
-        if((node.getContentDescription() != null || node.getText() != null) && (node.isClickable() || node.isFocusable())) return true;
-
-        return false;
-    }
+    };
 
     public boolean filterComponents(AccessibilityNodeInfo node){
         if(!node.isVisibleToUser()) return false;
-        if(!node.isClickable() && !node.isFocusable()) return false;
-//        if(!isComponentValidLayout(node)
-//        || (node.getText() == null && node.getContentDescription() == null && !node.isFocusable() && !node.isClickable())) return false;
-
-
-//        if() return false;
+        if(!node.isClickable()) return false;
 
         if(node.getClassName().toString().equals("android.widget.ImageView") && node.getContentDescription() == null)
             return false;
@@ -105,10 +106,14 @@ public class GetElementService extends AccessibilityService {
 
         var isClickable = rootNodes.isClickable();
         var isFocusable = rootNodes.isFocusable();
-        var componentModel = new ComponentModel(className, contentDesc, text, isClickable, isFocusable, bounds);
+        isFocusable = false;
+        this.idComponent = this.idComponent+1;
+
+//        Log.e(TAG, "addComponent: " + id);
+        var componentModel = new ComponentModel(this.idComponent, className, contentDesc, text, isClickable, isFocusable, bounds);
 
         components.add(componentModel);
-
+        nodesSent.add(rootNodes);
         printComponents(componentModel);
 
     }
@@ -139,8 +144,11 @@ public class GetElementService extends AccessibilityService {
 
 
     public void getViewEvent(){
+        components.clear();
+        nodesSent.clear();
+        idComponent = 0;
         AccessibilityNodeInfo rootNode = getRootInActiveWindow();
-
+//        rootNode.findAccessibilityNodeInfosByViewId()
         getComponent(rootNode);
 
 //        Log.e(TAG, "onAccessibilityEvent: Getting element");
@@ -164,11 +172,21 @@ public class GetElementService extends AccessibilityService {
             registerReceiver(receiver, intentFilter, RECEIVER_EXPORTED);
         }
 
+        IntentFilter intentFilter2 = new IntentFilter();
+        intentFilter2.addAction("com.example.maskbackgroundtest.GET_IDENTIFOR_ELEMENT");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(receiverIdentifidor, intentFilter2, RECEIVER_EXPORTED);
+        }
 
+        IntentFilter intentFilter3 = new IntentFilter();
+        intentFilter3.addAction("com.example.maskbackgroundtest.CLICK_ELEMENT");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(clickReceiver, intentFilter3, RECEIVER_EXPORTED);
+        }
 //        getViewEvent();
 
         var info = new AccessibilityServiceInfo();
-
+        info.flags |= AccessibilityServiceInfo.FLAG_REPORT_VIEW_IDS;
         info.feedbackType = AccessibilityServiceInfo.FEEDBACK_SPOKEN;
 
         this.setServiceInfo(info);
@@ -181,6 +199,9 @@ public class GetElementService extends AccessibilityService {
     @Override
     public void onDestroy() {
         unregisterReceiver(receiver);
+        unregisterReceiver(clickReceiver);
+        unregisterReceiver(receiverIdentifidor);
+
         super.onDestroy();
 
 

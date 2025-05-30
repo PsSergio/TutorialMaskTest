@@ -23,15 +23,15 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "GettingCache";
 //    private final MyReceiver receiver = new MyReceiver();
-    private final BroadcastReceiver receiverBounds = new BroadcastReceiver() {
+    private final BroadcastReceiver receiverIdentifidor = new BroadcastReceiver() {
     @Override
     public void onReceive(Context context, Intent intent) {
         Gson gson = new Gson();
-        String response = intent.getStringExtra("bounds");
-//        Log.e(TAG, "onReceive: " + response );
-        BoundsModel bounds = gson.fromJson(response, BoundsModel.class);
+        String response = intent.getStringExtra("identifidor");
 
-        mask.setPositions(bounds);
+        ComponentIdentidorModel identifidor = gson.fromJson(response, ComponentIdentidorModel.class);
+
+        mask.setPositions(identifidor.getBounds());
     }
 };
 
@@ -51,12 +51,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction("com.example.maskbackgroundtest.GET_BOUNDS_ELEMENT");
+        intentFilter.addAction("com.example.maskbackgroundtest.GET_IDENTIFOR_ELEMENT");
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            registerReceiver(receiverBounds, intentFilter, RECEIVER_EXPORTED);
+            registerReceiver(receiverIdentifidor, intentFilter, RECEIVER_EXPORTED);
         }
 
         showOverlay();
+
+        mask.setContext(this);
 
     }
 
@@ -96,7 +98,7 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        unregisterReceiver(receiverBounds);
+        unregisterReceiver(receiverIdentifidor);
         super.onDestroy();
     }
 }

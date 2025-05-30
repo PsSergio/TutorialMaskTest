@@ -2,6 +2,8 @@ package com.example.maskbackgroundtest;
 
 public class ComponentModel {
 
+    private final int viewID;
+
     private final String className;
 
     private final String contentDescription;
@@ -18,7 +20,8 @@ public class ComponentModel {
         return bounds;
     }
 
-    public ComponentModel(String className, String contentDescription, String text, boolean isClickable, boolean isFocusable, BoundsModel bounds) {
+    public ComponentModel(int viewId, String className, String contentDescription, String text, boolean isClickable, boolean isFocusable, BoundsModel bounds) {
+        this.viewID = viewId;
         this.className = className;
         this.contentDescription = contentDescription;
         this.text = text;
