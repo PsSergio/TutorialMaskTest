@@ -8,6 +8,8 @@ import androidx.annotation.NonNull;
 
 import com.google.gson.Gson;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -33,6 +35,28 @@ public class GetElementAPIService {
     }
 
 
+    public void saveinFile(String json){
+        var baseName = "jsonOutput";
+        var extension = "json";
+        File dir = context.getExternalFilesDir(null);
+        int index = 0;
+        File file;
+
+        do {
+            String fileName = (index == 0) ? baseName + "." + extension
+                    : baseName + index + "." + extension;
+            file = new File(dir, fileName);
+            index++;
+        } while (file.exists());
+
+        try (FileWriter writer = new FileWriter(file)) {
+            writer.write(json);
+            Log.d("DEBUG_FILE", "Arquivo salvo: " + file.getAbsolutePath());
+        } catch (IOException e) {
+            Log.e("DEBUG_FILE", "Erro ao salvar o arquivo", e);
+        }
+    }
+
     public void getIdentifidor(List<ComponentModel> componentModelList){
 
         Gson gson = new Gson();
@@ -41,7 +65,7 @@ public class GetElementAPIService {
 
         String json = gson.toJson(componentModelList);
 
-        Log.e(TAG, json);
+        saveinFile(json);
 
         RequestBody body = RequestBody.create(json, JSON);
 

@@ -29,9 +29,9 @@ public class MainActivity extends AppCompatActivity {
         Gson gson = new Gson();
         String response = intent.getStringExtra("identifidor");
 
-        ComponentIdentidorModel identifidor = gson.fromJson(response, ComponentIdentidorModel.class);
+        ResponseModel responseModel = gson.fromJson(response, ResponseModel.class);
 
-        mask.setPositions(identifidor.getBounds());
+        mask.setPositions(responseModel.getIdentifidor().getBounds());
     }
 };
 
