@@ -16,6 +16,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 
 public class GetElementService extends AccessibilityService {
@@ -47,12 +48,7 @@ public class GetElementService extends AccessibilityService {
         }};
 
     private final BroadcastReceiver clickReceiver = new BroadcastReceiver() {
-//        public boolean isBoundsEquals(Rect rect, BoundsModel bounds){
-//            return rect.top == bounds.getTop() &&
-//                    rect.bottom == bounds.getBottom() &&
-//                    rect.left == bounds.getLeft() &&
-//                    rect.right == bounds.getRight();
-//        }
+
         @Override
         public void onReceive(Context context, Intent intent) {
 //            Log.e(TAG, "onReceive: Recebeu");
@@ -82,6 +78,26 @@ public class GetElementService extends AccessibilityService {
         return true;
     }
 
+    public List<String> setAddicionalInfo(AccessibilityNodeInfo node){
+
+        var addicionalInfo = new ArrayList<String>();
+
+        if(node == null) return null;
+        if(node.getText() != null){
+            addicionalInfo.add(node.getText().toString());
+        }
+        if(node.getContentDescription() != null){
+            addicionalInfo.add(node.getContentDescription().toString());
+        }
+
+        for(int i = 0; i < node.getChildCount(); i++){
+            addicionalInfo.addAll(setAddicionalInfo(node.getChild(i)));
+        }
+
+        return addicionalInfo;
+
+    }
+
     public void addComponent(AccessibilityNodeInfo rootNodes){
         Rect rect = new Rect();
         rootNodes.getBoundsInScreen(rect);
@@ -91,18 +107,9 @@ public class GetElementService extends AccessibilityService {
 
         var className = rootNodes.getClassName().toString();
 
-        var contentDesc = "null";
-        var text = "null";
-        try{
-            contentDesc = rootNodes.getContentDescription().toString();
-        }catch (Exception e){
-            contentDesc = "null";
-        }
-        try{
-            text = rootNodes.getText().toString();
-        }catch (Exception e){
-            text = "null";
-        }
+        var addinfo = setAddicionalInfo(rootNodes);
+        String addinfoInString = addinfo.stream()
+                .collect(Collectors.joining(" - ", "", ""));
 
         var isClickable = rootNodes.isClickable();
         var isFocusable = rootNodes.isFocusable();
@@ -110,7 +117,7 @@ public class GetElementService extends AccessibilityService {
         this.idComponent = this.idComponent+1;
 
 //        Log.e(TAG, "addComponent: " + id);
-        var componentModel = new ComponentModel(this.idComponent, className, contentDesc, text, isClickable, isFocusable, bounds);
+        var componentModel = new ComponentModel(this.idComponent, className, isClickable, isFocusable, bounds, addinfoInString);
 
         components.add(componentModel);
         nodesSent.add(rootNodes);

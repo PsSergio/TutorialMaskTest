@@ -41,6 +41,8 @@ public class GetElementAPIService {
 
         String json = gson.toJson(componentModelList);
 
+        Log.e(TAG, json);
+
         RequestBody body = RequestBody.create(json, JSON);
 
         Request request = new Request.Builder()
