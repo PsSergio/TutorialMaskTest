@@ -3,6 +3,7 @@ package com.masktestapi.MaskApiTest.controller;
 import com.masktestapi.MaskApiTest.dto.BoundsRecordDTO;
 import com.masktestapi.MaskApiTest.dto.ComponentAndroidRecordDTO;
 import com.masktestapi.MaskApiTest.dto.ComponentIndenfidorRecordDTO;
+import com.masktestapi.MaskApiTest.dto.OutputResponse;
 import com.masktestapi.MaskApiTest.service.ComponentAndroidService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -24,11 +25,11 @@ public class ComponentAndroidController {
     }
 
     @PostMapping("getBounds")
-    public ResponseEntity<ComponentIndenfidorRecordDTO> getBounds(
+    public ResponseEntity<OutputResponse> getBounds(
             @RequestBody List<ComponentAndroidRecordDTO> components){
-        ComponentIndenfidorRecordDTO indenfidor = service.sortComponent(components);
+        OutputResponse response = service.sortComponent(components);
 
-        return ResponseEntity.status(HttpStatus.OK).body(indenfidor);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }   
 
 }
