@@ -32,38 +32,14 @@ public class GetElementService extends AccessibilityService {
         @Override
         public void onReceive(Context context, Intent intent) {
             getViewEvent();
-            service.getIdentifidor(components);
-
-        }
-    };
-
-    private final BroadcastReceiver receiverIdentifidor = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
             Gson gson = new Gson();
-            String response = intent.getStringExtra("identifidor");
+            String json = gson.toJson(components);
 
-            identidorModel = gson.fromJson(response, ComponentIdentidorModel.class);
-
-        }};
-
-    private final BroadcastReceiver clickReceiver = new BroadcastReceiver() {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-//            Log.e(TAG, "onReceive: Recebeu");
-            Log.e(TAG, "onReceive: " + identidorModel.getViewID());
-
-            AccessibilityNodeInfo nodeReturned = nodesSent.get(identidorModel.getViewID()-1);
-
-            if(nodeReturned.isClickable()){
-                nodeReturned.performAction(AccessibilityNodeInfo.ACTION_CLICK);
-
-
-            }
+            service.saveInFile(json);
 
         }
     };
+
 
     public boolean filterComponents(AccessibilityNodeInfo node){
         if(!node.isVisibleToUser()) return false;
@@ -77,6 +53,7 @@ public class GetElementService extends AccessibilityService {
 
         return true;
     }
+
 
     public List<String> setAddicionalInfo(AccessibilityNodeInfo node){
 
@@ -102,9 +79,6 @@ public class GetElementService extends AccessibilityService {
         Rect rect = new Rect();
         rootNodes.getBoundsInScreen(rect);
 
-        BoundsModel bounds = new BoundsModel(rect.left, rect.right, rect.top, rect.bottom);
-
-
         var className = rootNodes.getClassName().toString();
 
         var addinfo = setAddicionalInfo(rootNodes);
@@ -117,7 +91,7 @@ public class GetElementService extends AccessibilityService {
         this.idComponent = this.idComponent+1;
 
 //        Log.e(TAG, "addComponent: " + id);
-        var componentModel = new ComponentModel(this.idComponent, className, isClickable, isFocusable, bounds, addinfoInString);
+        var componentModel = new ComponentModel(this.idComponent, className, isClickable, isFocusable, addinfoInString);
 
         components.add(componentModel);
         nodesSent.add(rootNodes);
@@ -134,7 +108,15 @@ public class GetElementService extends AccessibilityService {
 
     public void getComponent(AccessibilityNodeInfo node){
 
-        if(node == null) return;
+        if(node == null) {
+            Log.e(TAG, "NULO!");
+            return;
+        }
+//
+//        CharSequence pkg = node.getPackageName();
+//        if (pkg != null && pkg.toString().equals(APOIODIGITAL_PACKAGE)) {
+//            return;
+//        }
 
         if(filterComponents(node)) {
 //            Log.e(TAG, "getComponent: ");
@@ -144,23 +126,25 @@ public class GetElementService extends AccessibilityService {
 
         for(int i = 0; i < node.getChildCount(); i++){
 
+
             getComponent(node.getChild(i));
 
         }
     }
 
 
+
     public void getViewEvent(){
+        var gson = new Gson();
         components.clear();
         nodesSent.clear();
         idComponent = 0;
         AccessibilityNodeInfo rootNode = getRootInActiveWindow();
 //        rootNode.findAccessibilityNodeInfosByViewId()
+
         getComponent(rootNode);
 
-//        Log.e(TAG, "onAccessibilityEvent: Getting element");
     }
-
 
     @Override
     public void onAccessibilityEvent(AccessibilityEvent event) {
@@ -179,17 +163,6 @@ public class GetElementService extends AccessibilityService {
             registerReceiver(receiver, intentFilter, RECEIVER_EXPORTED);
         }
 
-        IntentFilter intentFilter2 = new IntentFilter();
-        intentFilter2.addAction("com.example.maskbackgroundtest.GET_IDENTIFOR_ELEMENT");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            registerReceiver(receiverIdentifidor, intentFilter2, RECEIVER_EXPORTED);
-        }
-
-        IntentFilter intentFilter3 = new IntentFilter();
-        intentFilter3.addAction("com.example.maskbackgroundtest.CLICK_ELEMENT");
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            registerReceiver(clickReceiver, intentFilter3, RECEIVER_EXPORTED);
-        }
 //        getViewEvent();
 
         var info = new AccessibilityServiceInfo();
@@ -206,8 +179,7 @@ public class GetElementService extends AccessibilityService {
     @Override
     public void onDestroy() {
         unregisterReceiver(receiver);
-        unregisterReceiver(clickReceiver);
-        unregisterReceiver(receiverIdentifidor);
+
 
         super.onDestroy();
 
